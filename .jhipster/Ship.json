@@ -1,0 +1,48 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073108",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "ship",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "classificationSociety",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "iceClassPolarCode",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "technicalEfficiencyCode",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "shipType",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Ship",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "country",
+      "relationshipName": "ownerCountry",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityName": "flag",
+      "relationshipName": "flag",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "no"
+}

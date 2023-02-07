@@ -1,0 +1,35 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073113",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "event_report",
+  "fields": [
+    {
+      "fieldName": "documentDateAndTime",
+      "fieldType": "ZonedDateTime",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "speedGps",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "documentDisplayNumber",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "EventReport",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "voyage",
+      "relationshipName": "voyage",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "no"
+}

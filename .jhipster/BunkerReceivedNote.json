@@ -1,0 +1,31 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073111",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "bunker_received_note",
+  "fields": [
+    {
+      "fieldName": "documentDateAndTime",
+      "fieldType": "ZonedDateTime",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "documentDisplayNumber",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "BunkerReceivedNote",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "voyage",
+      "relationshipName": "voyage",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "no"
+}
