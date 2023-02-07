@@ -1,0 +1,20 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073417",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "bunker_received_note_line",
+  "fields": [
+    {
+      "fieldName": "quantity",
+      "fieldType": "BigDecimal"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "BunkerReceivedNoteLine",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [],
+  "service": "no"
+}

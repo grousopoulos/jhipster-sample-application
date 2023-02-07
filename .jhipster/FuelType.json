@@ -1,0 +1,32 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073415",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "fuel_type",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "fuelTypeCode",
+      "fieldType": "FuelTypeCode",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "MDO,ETHANOL,MGO,HFO,LFO,LNG,LPG_BUTANE,LPG_PROPANE,METHANOL,OTHER"
+    },
+    {
+      "fieldName": "carbonFactory",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "FuelType",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [],
+  "service": "no"
+}
