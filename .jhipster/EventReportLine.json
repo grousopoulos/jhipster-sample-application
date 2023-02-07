@@ -1,0 +1,31 @@
+{
+  "applications": "*",
+  "changelogDate": "20230207073419",
+  "dto": "no",
+  "embedded": false,
+  "entityTableName": "event_report_line",
+  "fields": [
+    {
+      "fieldName": "quantity",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "unitOfMeasure",
+      "fieldType": "UnitOfMeasure",
+      "fieldValues": "M_TONNES,M3"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "EventReportLine",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "fuelType",
+      "relationshipName": "fuelType",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "no"
+}
