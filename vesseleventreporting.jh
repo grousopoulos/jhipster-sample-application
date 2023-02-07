@@ -1,0 +1,93 @@
+entity Country {
+	code String required maxlength(2)
+	name String required
+}
+
+entity Flag {
+	code String required maxlength(2)
+	name String required
+}
+
+entity Port {
+	code String required maxlength(10)
+	name String required
+}
+
+entity ClasificationSociety {
+	code String required maxlength(10)
+	name String required
+}
+
+entity Ship {
+	name String required
+    classificationSociety String
+    iceClassPolarCode String
+    technicalEfficiencyCode String
+    shipType String
+}
+
+entity Voyage {
+	number String required
+}
+
+entity FuelType {
+	name String required
+	fuelTypeCode FuelTypeCode required
+    carbonFactory BigDecimal required
+}
+
+entity BunkerReceivedNote {
+	documentDateAndTime ZonedDateTime required
+	documentDisplayNumber String
+}
+
+entity BunkerReceivedNoteLine {
+	quantity BigDecimal
+}
+
+entity EventReport {
+	documentDateAndTime ZonedDateTime required
+	speedGps BigDecimal
+	documentDisplayNumber String
+}
+
+entity EventReportLine {
+	quantity BigDecimal
+    unitOfMeasure UnitOfMeasure
+}
+
+enum ShipType {
+	BULK, CHEM, COMB, CONT, CONT_RORO, GAS, GENERAL, LNG, OIL, OTHER, PAX, RCV, ROPAX, RORO, VEH
+}
+
+enum TechnicalEfficiencyCode {
+	EEDI, EIV, NA
+}
+
+enum FuelTypeCode {
+	MDO, ETHANOL, MGO, HFO, LFO, LNG, LPG_BUTANE, LPG_PROPANE, METHANOL, OTHER
+}
+
+enum UnitOfMeasure {
+    M_TONNES, M3
+}
+
+enum DiffCriterionCode {
+	ON_BALLAST, ON_LADEN, CARGO_HEATING, DYNAMIC_POSITIONING, PASSENGER_TRANSPORT, FREIGHT_TRANSPORT
+}
+
+enum CargoFieldCode {
+	CARGO_MASS_TRANSPORT_WORK_MASS, CARGO_VOLUME_TRANSPORT_WORK_VOLUME, CARGO_DWT_TRANSPORT_WORK_DWT, NO_OF_PASSENGERS_TRANSPORT_WORK_PAX, CARGO_MASS_TRANSPORT_WORK_FREIGHT
+}
+
+enum PortActivityCode {
+	AT_BERTH, MOVEMENT
+}
+
+relationship ManyToOne {
+	Ship{ownerCountry} to Country
+    Ship{flag} to Flag
+    BunkerReceivedNote{voyage} to Voyage
+    EventReport{voyage} to Voyage
+    EventReportLine{fuelType} to FuelType
+}
