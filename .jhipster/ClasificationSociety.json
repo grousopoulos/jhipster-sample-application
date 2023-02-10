@@ -1,7 +1,7 @@
 {
   "applications": "*",
   "changelogDate": "20230207073412",
-  "dto": "no",
+  "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "clasification_society",
   "fields": [
@@ -23,5 +23,5 @@
   "pagination": "no",
   "readOnly": false,
   "relationships": [],
-  "service": "no"
+  "service": "serviceClass"
 }

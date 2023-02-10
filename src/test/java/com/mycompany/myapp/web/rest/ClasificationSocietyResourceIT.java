@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.ClasificationSociety;
 import com.mycompany.myapp.repository.ClasificationSocietyRepository;
+import com.mycompany.myapp.service.dto.ClasificationSocietyDTO;
+import com.mycompany.myapp.service.mapper.ClasificationSocietyMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class ClasificationSocietyResourceIT {
 
     @Autowired
     private ClasificationSocietyRepository clasificationSocietyRepository;
+
+    @Autowired
+    private ClasificationSocietyMapper clasificationSocietyMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,11 +89,12 @@ class ClasificationSocietyResourceIT {
     void createClasificationSociety() throws Exception {
         int databaseSizeBeforeCreate = clasificationSocietyRepository.findAll().size();
         // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
         restClasificationSocietyMockMvc
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isCreated());
 
@@ -105,6 +111,7 @@ class ClasificationSocietyResourceIT {
     void createClasificationSocietyWithExistingId() throws Exception {
         // Create the ClasificationSociety with an existing ID
         clasificationSociety.setId(1L);
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
 
         int databaseSizeBeforeCreate = clasificationSocietyRepository.findAll().size();
 
@@ -113,7 +120,7 @@ class ClasificationSocietyResourceIT {
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -130,12 +137,13 @@ class ClasificationSocietyResourceIT {
         clasificationSociety.setCode(null);
 
         // Create the ClasificationSociety, which fails.
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
 
         restClasificationSocietyMockMvc
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -151,12 +159,13 @@ class ClasificationSocietyResourceIT {
         clasificationSociety.setName(null);
 
         // Create the ClasificationSociety, which fails.
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
 
         restClasificationSocietyMockMvc
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -216,12 +225,13 @@ class ClasificationSocietyResourceIT {
         // Disconnect from session so that the updates on updatedClasificationSociety are not directly saved in db
         em.detach(updatedClasificationSociety);
         updatedClasificationSociety.code(UPDATED_CODE).name(UPDATED_NAME);
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(updatedClasificationSociety);
 
         restClasificationSocietyMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedClasificationSociety.getId())
+                put(ENTITY_API_URL_ID, clasificationSocietyDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedClasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isOk());
 
@@ -239,12 +249,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, clasificationSociety.getId())
+                put(ENTITY_API_URL_ID, clasificationSocietyDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -259,12 +272,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -279,10 +295,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
-                put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                put(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 
@@ -357,12 +378,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, clasificationSociety.getId())
+                patch(ENTITY_API_URL_ID, clasificationSocietyDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -377,12 +401,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -397,12 +424,15 @@ class ClasificationSocietyResourceIT {
         int databaseSizeBeforeUpdate = clasificationSocietyRepository.findAll().size();
         clasificationSociety.setId(count.incrementAndGet());
 
+        // Create the ClasificationSociety
+        ClasificationSocietyDTO clasificationSocietyDTO = clasificationSocietyMapper.toDto(clasificationSociety);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restClasificationSocietyMockMvc
             .perform(
                 patch(ENTITY_API_URL)
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(clasificationSociety))
+                    .content(TestUtil.convertObjectToJsonBytes(clasificationSocietyDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 

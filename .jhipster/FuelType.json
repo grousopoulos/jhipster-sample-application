@@ -1,7 +1,7 @@
 {
   "applications": "*",
   "changelogDate": "20230207073415",
-  "dto": "no",
+  "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "fuel_type",
   "fields": [
@@ -28,5 +28,5 @@
   "pagination": "no",
   "readOnly": false,
   "relationships": [],
-  "service": "no"
+  "service": "serviceClass"
 }

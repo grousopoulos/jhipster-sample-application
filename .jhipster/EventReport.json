@@ -1,7 +1,7 @@
 {
   "applications": "*",
   "changelogDate": "20230207073418",
-  "dto": "no",
+  "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "event_report",
   "fields": [
@@ -31,5 +31,5 @@
       "relationshipType": "many-to-one"
     }
   ],
-  "service": "no"
+  "service": "serviceClass"
 }

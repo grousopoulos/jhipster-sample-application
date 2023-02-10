@@ -1,7 +1,8 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Voyage;
 import com.mycompany.myapp.repository.VoyageRepository;
+import com.mycompany.myapp.service.VoyageService;
+import com.mycompany.myapp.service.dto.VoyageDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -24,7 +24,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api")
-@Transactional
 public class VoyageResource {
 
     private final Logger log = LoggerFactory.getLogger(VoyageResource.class);
@@ -34,26 +33,29 @@ public class VoyageResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private final VoyageService voyageService;
+
     private final VoyageRepository voyageRepository;
 
-    public VoyageResource(VoyageRepository voyageRepository) {
+    public VoyageResource(VoyageService voyageService, VoyageRepository voyageRepository) {
+        this.voyageService = voyageService;
         this.voyageRepository = voyageRepository;
     }
 
     /**
      * {@code POST  /voyages} : Create a new voyage.
      *
-     * @param voyage the voyage to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new voyage, or with status {@code 400 (Bad Request)} if the voyage has already an ID.
+     * @param voyageDTO the voyageDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new voyageDTO, or with status {@code 400 (Bad Request)} if the voyage has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/voyages")
-    public ResponseEntity<Voyage> createVoyage(@Valid @RequestBody Voyage voyage) throws URISyntaxException {
-        log.debug("REST request to save Voyage : {}", voyage);
-        if (voyage.getId() != null) {
+    public ResponseEntity<VoyageDTO> createVoyage(@Valid @RequestBody VoyageDTO voyageDTO) throws URISyntaxException {
+        log.debug("REST request to save Voyage : {}", voyageDTO);
+        if (voyageDTO.getId() != null) {
             throw new BadRequestAlertException("A new voyage cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Voyage result = voyageRepository.save(voyage);
+        VoyageDTO result = voyageService.save(voyageDTO);
         return ResponseEntity
             .created(new URI("/api/voyages/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
@@ -63,23 +65,23 @@ public class VoyageResource {
     /**
      * {@code PUT  /voyages/:id} : Updates an existing voyage.
      *
-     * @param id the id of the voyage to save.
-     * @param voyage the voyage to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated voyage,
-     * or with status {@code 400 (Bad Request)} if the voyage is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the voyage couldn't be updated.
+     * @param id the id of the voyageDTO to save.
+     * @param voyageDTO the voyageDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated voyageDTO,
+     * or with status {@code 400 (Bad Request)} if the voyageDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the voyageDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/voyages/{id}")
-    public ResponseEntity<Voyage> updateVoyage(
+    public ResponseEntity<VoyageDTO> updateVoyage(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody Voyage voyage
+        @Valid @RequestBody VoyageDTO voyageDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Voyage : {}, {}", id, voyage);
-        if (voyage.getId() == null) {
+        log.debug("REST request to update Voyage : {}, {}", id, voyageDTO);
+        if (voyageDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, voyage.getId())) {
+        if (!Objects.equals(id, voyageDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -87,34 +89,34 @@ public class VoyageResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Voyage result = voyageRepository.save(voyage);
+        VoyageDTO result = voyageService.update(voyageDTO);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, voyage.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, voyageDTO.getId().toString()))
             .body(result);
     }
 
     /**
      * {@code PATCH  /voyages/:id} : Partial updates given fields of an existing voyage, field will ignore if it is null
      *
-     * @param id the id of the voyage to save.
-     * @param voyage the voyage to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated voyage,
-     * or with status {@code 400 (Bad Request)} if the voyage is not valid,
-     * or with status {@code 404 (Not Found)} if the voyage is not found,
-     * or with status {@code 500 (Internal Server Error)} if the voyage couldn't be updated.
+     * @param id the id of the voyageDTO to save.
+     * @param voyageDTO the voyageDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated voyageDTO,
+     * or with status {@code 400 (Bad Request)} if the voyageDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the voyageDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the voyageDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/voyages/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Voyage> partialUpdateVoyage(
+    public ResponseEntity<VoyageDTO> partialUpdateVoyage(
         @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody Voyage voyage
+        @NotNull @RequestBody VoyageDTO voyageDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Voyage partially : {}, {}", id, voyage);
-        if (voyage.getId() == null) {
+        log.debug("REST request to partial update Voyage partially : {}, {}", id, voyageDTO);
+        if (voyageDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, voyage.getId())) {
+        if (!Objects.equals(id, voyageDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -122,20 +124,11 @@ public class VoyageResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<Voyage> result = voyageRepository
-            .findById(voyage.getId())
-            .map(existingVoyage -> {
-                if (voyage.getNumber() != null) {
-                    existingVoyage.setNumber(voyage.getNumber());
-                }
-
-                return existingVoyage;
-            })
-            .map(voyageRepository::save);
+        Optional<VoyageDTO> result = voyageService.partialUpdate(voyageDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, voyage.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, voyageDTO.getId().toString())
         );
     }
 
@@ -145,34 +138,34 @@ public class VoyageResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of voyages in body.
      */
     @GetMapping("/voyages")
-    public List<Voyage> getAllVoyages() {
+    public List<VoyageDTO> getAllVoyages() {
         log.debug("REST request to get all Voyages");
-        return voyageRepository.findAll();
+        return voyageService.findAll();
     }
 
     /**
      * {@code GET  /voyages/:id} : get the "id" voyage.
      *
-     * @param id the id of the voyage to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the voyage, or with status {@code 404 (Not Found)}.
+     * @param id the id of the voyageDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the voyageDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/voyages/{id}")
-    public ResponseEntity<Voyage> getVoyage(@PathVariable Long id) {
+    public ResponseEntity<VoyageDTO> getVoyage(@PathVariable Long id) {
         log.debug("REST request to get Voyage : {}", id);
-        Optional<Voyage> voyage = voyageRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(voyage);
+        Optional<VoyageDTO> voyageDTO = voyageService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(voyageDTO);
     }
 
     /**
      * {@code DELETE  /voyages/:id} : delete the "id" voyage.
      *
-     * @param id the id of the voyage to delete.
+     * @param id the id of the voyageDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/voyages/{id}")
     public ResponseEntity<Void> deleteVoyage(@PathVariable Long id) {
         log.debug("REST request to delete Voyage : {}", id);
-        voyageRepository.deleteById(id);
+        voyageService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))

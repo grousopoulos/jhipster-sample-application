@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Voyage;
 import com.mycompany.myapp.repository.VoyageRepository;
+import com.mycompany.myapp.service.dto.VoyageDTO;
+import com.mycompany.myapp.service.mapper.VoyageMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,6 +42,9 @@ class VoyageResourceIT {
 
     @Autowired
     private VoyageRepository voyageRepository;
+
+    @Autowired
+    private VoyageMapper voyageMapper;
 
     @Autowired
     private EntityManager em;
@@ -81,8 +86,9 @@ class VoyageResourceIT {
     void createVoyage() throws Exception {
         int databaseSizeBeforeCreate = voyageRepository.findAll().size();
         // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
         restVoyageMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyage)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyageDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Voyage in the database
@@ -97,12 +103,13 @@ class VoyageResourceIT {
     void createVoyageWithExistingId() throws Exception {
         // Create the Voyage with an existing ID
         voyage.setId(1L);
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
 
         int databaseSizeBeforeCreate = voyageRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restVoyageMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyage)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyageDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Voyage in the database
@@ -118,9 +125,10 @@ class VoyageResourceIT {
         voyage.setNumber(null);
 
         // Create the Voyage, which fails.
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
 
         restVoyageMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyage)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyageDTO)))
             .andExpect(status().isBadRequest());
 
         List<Voyage> voyageList = voyageRepository.findAll();
@@ -177,12 +185,13 @@ class VoyageResourceIT {
         // Disconnect from session so that the updates on updatedVoyage are not directly saved in db
         em.detach(updatedVoyage);
         updatedVoyage.number(UPDATED_NUMBER);
+        VoyageDTO voyageDTO = voyageMapper.toDto(updatedVoyage);
 
         restVoyageMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedVoyage.getId())
+                put(ENTITY_API_URL_ID, voyageDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedVoyage))
+                    .content(TestUtil.convertObjectToJsonBytes(voyageDTO))
             )
             .andExpect(status().isOk());
 
@@ -199,12 +208,15 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restVoyageMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, voyage.getId())
+                put(ENTITY_API_URL_ID, voyageDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(voyage))
+                    .content(TestUtil.convertObjectToJsonBytes(voyageDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -219,12 +231,15 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restVoyageMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(voyage))
+                    .content(TestUtil.convertObjectToJsonBytes(voyageDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -239,9 +254,12 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restVoyageMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyage)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(voyageDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Voyage in the database
@@ -313,12 +331,15 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restVoyageMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, voyage.getId())
+                patch(ENTITY_API_URL_ID, voyageDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(voyage))
+                    .content(TestUtil.convertObjectToJsonBytes(voyageDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -333,12 +354,15 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restVoyageMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(voyage))
+                    .content(TestUtil.convertObjectToJsonBytes(voyageDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -353,9 +377,14 @@ class VoyageResourceIT {
         int databaseSizeBeforeUpdate = voyageRepository.findAll().size();
         voyage.setId(count.incrementAndGet());
 
+        // Create the Voyage
+        VoyageDTO voyageDTO = voyageMapper.toDto(voyage);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restVoyageMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(voyage)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(voyageDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Voyage in the database
