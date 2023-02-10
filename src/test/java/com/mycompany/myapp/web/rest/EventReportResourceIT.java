@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.EventReport;
 import com.mycompany.myapp.repository.EventReportRepository;
+import com.mycompany.myapp.service.dto.EventReportDTO;
+import com.mycompany.myapp.service.mapper.EventReportMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -53,6 +55,9 @@ class EventReportResourceIT {
 
     @Autowired
     private EventReportRepository eventReportRepository;
+
+    @Autowired
+    private EventReportMapper eventReportMapper;
 
     @Autowired
     private EntityManager em;
@@ -100,8 +105,11 @@ class EventReportResourceIT {
     void createEventReport() throws Exception {
         int databaseSizeBeforeCreate = eventReportRepository.findAll().size();
         // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
         restEventReportMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReport)))
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
+            )
             .andExpect(status().isCreated());
 
         // Validate the EventReport in the database
@@ -118,12 +126,15 @@ class EventReportResourceIT {
     void createEventReportWithExistingId() throws Exception {
         // Create the EventReport with an existing ID
         eventReport.setId(1L);
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
 
         int databaseSizeBeforeCreate = eventReportRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restEventReportMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReport)))
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the EventReport in the database
@@ -139,9 +150,12 @@ class EventReportResourceIT {
         eventReport.setDocumentDateAndTime(null);
 
         // Create the EventReport, which fails.
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
 
         restEventReportMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReport)))
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
+            )
             .andExpect(status().isBadRequest());
 
         List<EventReport> eventReportList = eventReportRepository.findAll();
@@ -205,12 +219,13 @@ class EventReportResourceIT {
             .documentDateAndTime(UPDATED_DOCUMENT_DATE_AND_TIME)
             .speedGps(UPDATED_SPEED_GPS)
             .documentDisplayNumber(UPDATED_DOCUMENT_DISPLAY_NUMBER);
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(updatedEventReport);
 
         restEventReportMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedEventReport.getId())
+                put(ENTITY_API_URL_ID, eventReportDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedEventReport))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isOk());
 
@@ -229,12 +244,15 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restEventReportMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, eventReport.getId())
+                put(ENTITY_API_URL_ID, eventReportDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(eventReport))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -249,12 +267,15 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(eventReport))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -269,9 +290,12 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReport)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the EventReport in the database
@@ -348,12 +372,15 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restEventReportMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, eventReport.getId())
+                patch(ENTITY_API_URL_ID, eventReportDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(eventReport))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -368,12 +395,15 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(eventReport))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -388,10 +418,13 @@ class EventReportResourceIT {
         int databaseSizeBeforeUpdate = eventReportRepository.findAll().size();
         eventReport.setId(count.incrementAndGet());
 
+        // Create the EventReport
+        EventReportDTO eventReportDTO = eventReportMapper.toDto(eventReport);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportMockMvc
             .perform(
-                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(eventReport))
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(eventReportDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 

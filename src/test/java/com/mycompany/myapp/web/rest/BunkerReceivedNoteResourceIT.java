@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.BunkerReceivedNote;
 import com.mycompany.myapp.repository.BunkerReceivedNoteRepository;
+import com.mycompany.myapp.service.dto.BunkerReceivedNoteDTO;
+import com.mycompany.myapp.service.mapper.BunkerReceivedNoteMapper;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -48,6 +50,9 @@ class BunkerReceivedNoteResourceIT {
 
     @Autowired
     private BunkerReceivedNoteRepository bunkerReceivedNoteRepository;
+
+    @Autowired
+    private BunkerReceivedNoteMapper bunkerReceivedNoteMapper;
 
     @Autowired
     private EntityManager em;
@@ -93,9 +98,12 @@ class BunkerReceivedNoteResourceIT {
     void createBunkerReceivedNote() throws Exception {
         int databaseSizeBeforeCreate = bunkerReceivedNoteRepository.findAll().size();
         // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
         restBunkerReceivedNoteMockMvc
             .perform(
-                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isCreated());
 
@@ -112,13 +120,16 @@ class BunkerReceivedNoteResourceIT {
     void createBunkerReceivedNoteWithExistingId() throws Exception {
         // Create the BunkerReceivedNote with an existing ID
         bunkerReceivedNote.setId(1L);
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
 
         int databaseSizeBeforeCreate = bunkerReceivedNoteRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restBunkerReceivedNoteMockMvc
             .perform(
-                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -135,10 +146,13 @@ class BunkerReceivedNoteResourceIT {
         bunkerReceivedNote.setDocumentDateAndTime(null);
 
         // Create the BunkerReceivedNote, which fails.
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
 
         restBunkerReceivedNoteMockMvc
             .perform(
-                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                post(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -200,12 +214,13 @@ class BunkerReceivedNoteResourceIT {
         updatedBunkerReceivedNote
             .documentDateAndTime(UPDATED_DOCUMENT_DATE_AND_TIME)
             .documentDisplayNumber(UPDATED_DOCUMENT_DISPLAY_NUMBER);
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(updatedBunkerReceivedNote);
 
         restBunkerReceivedNoteMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedBunkerReceivedNote.getId())
+                put(ENTITY_API_URL_ID, bunkerReceivedNoteDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedBunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isOk());
 
@@ -223,12 +238,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, bunkerReceivedNote.getId())
+                put(ENTITY_API_URL_ID, bunkerReceivedNoteDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -243,12 +261,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -263,10 +284,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
-                put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                put(ENTITY_API_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 
@@ -343,12 +369,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, bunkerReceivedNote.getId())
+                patch(ENTITY_API_URL_ID, bunkerReceivedNoteDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -363,12 +392,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -383,12 +415,15 @@ class BunkerReceivedNoteResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteRepository.findAll().size();
         bunkerReceivedNote.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNote
+        BunkerReceivedNoteDTO bunkerReceivedNoteDTO = bunkerReceivedNoteMapper.toDto(bunkerReceivedNote);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteMockMvc
             .perform(
                 patch(ENTITY_API_URL)
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNote))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 

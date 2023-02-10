@@ -1,7 +1,7 @@
 {
   "applications": "*",
   "changelogDate": "20230207073413",
-  "dto": "no",
+  "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "ship",
   "fields": [
@@ -44,5 +44,5 @@
       "relationshipType": "many-to-one"
     }
   ],
-  "service": "no"
+  "service": "serviceClass"
 }

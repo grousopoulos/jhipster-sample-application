@@ -1,7 +1,8 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.EventReport;
 import com.mycompany.myapp.repository.EventReportRepository;
+import com.mycompany.myapp.service.EventReportService;
+import com.mycompany.myapp.service.dto.EventReportDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -24,7 +24,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api")
-@Transactional
 public class EventReportResource {
 
     private final Logger log = LoggerFactory.getLogger(EventReportResource.class);
@@ -34,26 +33,29 @@ public class EventReportResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private final EventReportService eventReportService;
+
     private final EventReportRepository eventReportRepository;
 
-    public EventReportResource(EventReportRepository eventReportRepository) {
+    public EventReportResource(EventReportService eventReportService, EventReportRepository eventReportRepository) {
+        this.eventReportService = eventReportService;
         this.eventReportRepository = eventReportRepository;
     }
 
     /**
      * {@code POST  /event-reports} : Create a new eventReport.
      *
-     * @param eventReport the eventReport to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new eventReport, or with status {@code 400 (Bad Request)} if the eventReport has already an ID.
+     * @param eventReportDTO the eventReportDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new eventReportDTO, or with status {@code 400 (Bad Request)} if the eventReport has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/event-reports")
-    public ResponseEntity<EventReport> createEventReport(@Valid @RequestBody EventReport eventReport) throws URISyntaxException {
-        log.debug("REST request to save EventReport : {}", eventReport);
-        if (eventReport.getId() != null) {
+    public ResponseEntity<EventReportDTO> createEventReport(@Valid @RequestBody EventReportDTO eventReportDTO) throws URISyntaxException {
+        log.debug("REST request to save EventReport : {}", eventReportDTO);
+        if (eventReportDTO.getId() != null) {
             throw new BadRequestAlertException("A new eventReport cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        EventReport result = eventReportRepository.save(eventReport);
+        EventReportDTO result = eventReportService.save(eventReportDTO);
         return ResponseEntity
             .created(new URI("/api/event-reports/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
@@ -63,23 +65,23 @@ public class EventReportResource {
     /**
      * {@code PUT  /event-reports/:id} : Updates an existing eventReport.
      *
-     * @param id the id of the eventReport to save.
-     * @param eventReport the eventReport to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReport,
-     * or with status {@code 400 (Bad Request)} if the eventReport is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the eventReport couldn't be updated.
+     * @param id the id of the eventReportDTO to save.
+     * @param eventReportDTO the eventReportDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportDTO,
+     * or with status {@code 400 (Bad Request)} if the eventReportDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the eventReportDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/event-reports/{id}")
-    public ResponseEntity<EventReport> updateEventReport(
+    public ResponseEntity<EventReportDTO> updateEventReport(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody EventReport eventReport
+        @Valid @RequestBody EventReportDTO eventReportDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update EventReport : {}, {}", id, eventReport);
-        if (eventReport.getId() == null) {
+        log.debug("REST request to update EventReport : {}, {}", id, eventReportDTO);
+        if (eventReportDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, eventReport.getId())) {
+        if (!Objects.equals(id, eventReportDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -87,34 +89,34 @@ public class EventReportResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        EventReport result = eventReportRepository.save(eventReport);
+        EventReportDTO result = eventReportService.update(eventReportDTO);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReport.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportDTO.getId().toString()))
             .body(result);
     }
 
     /**
      * {@code PATCH  /event-reports/:id} : Partial updates given fields of an existing eventReport, field will ignore if it is null
      *
-     * @param id the id of the eventReport to save.
-     * @param eventReport the eventReport to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReport,
-     * or with status {@code 400 (Bad Request)} if the eventReport is not valid,
-     * or with status {@code 404 (Not Found)} if the eventReport is not found,
-     * or with status {@code 500 (Internal Server Error)} if the eventReport couldn't be updated.
+     * @param id the id of the eventReportDTO to save.
+     * @param eventReportDTO the eventReportDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportDTO,
+     * or with status {@code 400 (Bad Request)} if the eventReportDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the eventReportDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the eventReportDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/event-reports/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<EventReport> partialUpdateEventReport(
+    public ResponseEntity<EventReportDTO> partialUpdateEventReport(
         @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody EventReport eventReport
+        @NotNull @RequestBody EventReportDTO eventReportDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update EventReport partially : {}, {}", id, eventReport);
-        if (eventReport.getId() == null) {
+        log.debug("REST request to partial update EventReport partially : {}, {}", id, eventReportDTO);
+        if (eventReportDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, eventReport.getId())) {
+        if (!Objects.equals(id, eventReportDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -122,26 +124,11 @@ public class EventReportResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<EventReport> result = eventReportRepository
-            .findById(eventReport.getId())
-            .map(existingEventReport -> {
-                if (eventReport.getDocumentDateAndTime() != null) {
-                    existingEventReport.setDocumentDateAndTime(eventReport.getDocumentDateAndTime());
-                }
-                if (eventReport.getSpeedGps() != null) {
-                    existingEventReport.setSpeedGps(eventReport.getSpeedGps());
-                }
-                if (eventReport.getDocumentDisplayNumber() != null) {
-                    existingEventReport.setDocumentDisplayNumber(eventReport.getDocumentDisplayNumber());
-                }
-
-                return existingEventReport;
-            })
-            .map(eventReportRepository::save);
+        Optional<EventReportDTO> result = eventReportService.partialUpdate(eventReportDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReport.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportDTO.getId().toString())
         );
     }
 
@@ -151,34 +138,34 @@ public class EventReportResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of eventReports in body.
      */
     @GetMapping("/event-reports")
-    public List<EventReport> getAllEventReports() {
+    public List<EventReportDTO> getAllEventReports() {
         log.debug("REST request to get all EventReports");
-        return eventReportRepository.findAll();
+        return eventReportService.findAll();
     }
 
     /**
      * {@code GET  /event-reports/:id} : get the "id" eventReport.
      *
-     * @param id the id of the eventReport to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eventReport, or with status {@code 404 (Not Found)}.
+     * @param id the id of the eventReportDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eventReportDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/event-reports/{id}")
-    public ResponseEntity<EventReport> getEventReport(@PathVariable Long id) {
+    public ResponseEntity<EventReportDTO> getEventReport(@PathVariable Long id) {
         log.debug("REST request to get EventReport : {}", id);
-        Optional<EventReport> eventReport = eventReportRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(eventReport);
+        Optional<EventReportDTO> eventReportDTO = eventReportService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(eventReportDTO);
     }
 
     /**
      * {@code DELETE  /event-reports/:id} : delete the "id" eventReport.
      *
-     * @param id the id of the eventReport to delete.
+     * @param id the id of the eventReportDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/event-reports/{id}")
     public ResponseEntity<Void> deleteEventReport(@PathVariable Long id) {
         log.debug("REST request to delete EventReport : {}", id);
-        eventReportRepository.deleteById(id);
+        eventReportService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))

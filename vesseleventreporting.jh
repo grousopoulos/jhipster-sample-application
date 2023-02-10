@@ -91,3 +91,6 @@ relationship ManyToOne {
     EventReport{voyage} to Voyage
     EventReportLine{fuelType} to FuelType
 }
+
+dto all with mapstruct
+service all with serviceClass

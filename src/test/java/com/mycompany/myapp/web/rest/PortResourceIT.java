@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Port;
 import com.mycompany.myapp.repository.PortRepository;
+import com.mycompany.myapp.service.dto.PortDTO;
+import com.mycompany.myapp.service.mapper.PortMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class PortResourceIT {
 
     @Autowired
     private PortRepository portRepository;
+
+    @Autowired
+    private PortMapper portMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,9 @@ class PortResourceIT {
     void createPort() throws Exception {
         int databaseSizeBeforeCreate = portRepository.findAll().size();
         // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
         restPortMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Port in the database
@@ -101,12 +107,13 @@ class PortResourceIT {
     void createPortWithExistingId() throws Exception {
         // Create the Port with an existing ID
         port.setId(1L);
+        PortDTO portDTO = portMapper.toDto(port);
 
         int databaseSizeBeforeCreate = portRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restPortMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Port in the database
@@ -122,9 +129,10 @@ class PortResourceIT {
         port.setCode(null);
 
         // Create the Port, which fails.
+        PortDTO portDTO = portMapper.toDto(port);
 
         restPortMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isBadRequest());
 
         List<Port> portList = portRepository.findAll();
@@ -139,9 +147,10 @@ class PortResourceIT {
         port.setName(null);
 
         // Create the Port, which fails.
+        PortDTO portDTO = portMapper.toDto(port);
 
         restPortMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isBadRequest());
 
         List<Port> portList = portRepository.findAll();
@@ -200,12 +209,13 @@ class PortResourceIT {
         // Disconnect from session so that the updates on updatedPort are not directly saved in db
         em.detach(updatedPort);
         updatedPort.code(UPDATED_CODE).name(UPDATED_NAME);
+        PortDTO portDTO = portMapper.toDto(updatedPort);
 
         restPortMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedPort.getId())
+                put(ENTITY_API_URL_ID, portDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedPort))
+                    .content(TestUtil.convertObjectToJsonBytes(portDTO))
             )
             .andExpect(status().isOk());
 
@@ -223,12 +233,15 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restPortMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, port.getId())
+                put(ENTITY_API_URL_ID, portDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(port))
+                    .content(TestUtil.convertObjectToJsonBytes(portDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -243,12 +256,15 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restPortMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(port))
+                    .content(TestUtil.convertObjectToJsonBytes(portDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -263,9 +279,12 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restPortMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Port in the database
@@ -339,12 +358,15 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restPortMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, port.getId())
+                patch(ENTITY_API_URL_ID, portDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(port))
+                    .content(TestUtil.convertObjectToJsonBytes(portDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -359,12 +381,15 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restPortMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(port))
+                    .content(TestUtil.convertObjectToJsonBytes(portDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -379,9 +404,12 @@ class PortResourceIT {
         int databaseSizeBeforeUpdate = portRepository.findAll().size();
         port.setId(count.incrementAndGet());
 
+        // Create the Port
+        PortDTO portDTO = portMapper.toDto(port);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restPortMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(port)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(portDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Port in the database

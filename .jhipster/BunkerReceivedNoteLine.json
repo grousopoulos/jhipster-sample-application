@@ -1,7 +1,7 @@
 {
   "applications": "*",
   "changelogDate": "20230207073417",
-  "dto": "no",
+  "dto": "mapstruct",
   "embedded": false,
   "entityTableName": "bunker_received_note_line",
   "fields": [
@@ -16,5 +16,5 @@
   "pagination": "no",
   "readOnly": false,
   "relationships": [],
-  "service": "no"
+  "service": "serviceClass"
 }

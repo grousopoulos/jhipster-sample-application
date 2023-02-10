@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Ship;
 import com.mycompany.myapp.repository.ShipRepository;
+import com.mycompany.myapp.service.dto.ShipDTO;
+import com.mycompany.myapp.service.mapper.ShipMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,6 +54,9 @@ class ShipResourceIT {
 
     @Autowired
     private ShipRepository shipRepository;
+
+    @Autowired
+    private ShipMapper shipMapper;
 
     @Autowired
     private EntityManager em;
@@ -103,8 +108,9 @@ class ShipResourceIT {
     void createShip() throws Exception {
         int databaseSizeBeforeCreate = shipRepository.findAll().size();
         // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
         restShipMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(ship)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(shipDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Ship in the database
@@ -123,12 +129,13 @@ class ShipResourceIT {
     void createShipWithExistingId() throws Exception {
         // Create the Ship with an existing ID
         ship.setId(1L);
+        ShipDTO shipDTO = shipMapper.toDto(ship);
 
         int databaseSizeBeforeCreate = shipRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restShipMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(ship)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(shipDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Ship in the database
@@ -144,9 +151,10 @@ class ShipResourceIT {
         ship.setName(null);
 
         // Create the Ship, which fails.
+        ShipDTO shipDTO = shipMapper.toDto(ship);
 
         restShipMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(ship)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(shipDTO)))
             .andExpect(status().isBadRequest());
 
         List<Ship> shipList = shipRepository.findAll();
@@ -216,12 +224,13 @@ class ShipResourceIT {
             .iceClassPolarCode(UPDATED_ICE_CLASS_POLAR_CODE)
             .technicalEfficiencyCode(UPDATED_TECHNICAL_EFFICIENCY_CODE)
             .shipType(UPDATED_SHIP_TYPE);
+        ShipDTO shipDTO = shipMapper.toDto(updatedShip);
 
         restShipMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedShip.getId())
+                put(ENTITY_API_URL_ID, shipDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedShip))
+                    .content(TestUtil.convertObjectToJsonBytes(shipDTO))
             )
             .andExpect(status().isOk());
 
@@ -242,12 +251,15 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restShipMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, ship.getId())
+                put(ENTITY_API_URL_ID, shipDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(ship))
+                    .content(TestUtil.convertObjectToJsonBytes(shipDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -262,12 +274,15 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restShipMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(ship))
+                    .content(TestUtil.convertObjectToJsonBytes(shipDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -282,9 +297,12 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restShipMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(ship)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(shipDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Ship in the database
@@ -369,12 +387,15 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restShipMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, ship.getId())
+                patch(ENTITY_API_URL_ID, shipDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(ship))
+                    .content(TestUtil.convertObjectToJsonBytes(shipDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -389,12 +410,15 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restShipMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(ship))
+                    .content(TestUtil.convertObjectToJsonBytes(shipDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -409,9 +433,12 @@ class ShipResourceIT {
         int databaseSizeBeforeUpdate = shipRepository.findAll().size();
         ship.setId(count.incrementAndGet());
 
+        // Create the Ship
+        ShipDTO shipDTO = shipMapper.toDto(ship);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restShipMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(ship)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(shipDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Ship in the database

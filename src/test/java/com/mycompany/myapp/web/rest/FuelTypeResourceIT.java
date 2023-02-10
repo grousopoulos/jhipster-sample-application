@@ -10,6 +10,8 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.FuelType;
 import com.mycompany.myapp.domain.enumeration.FuelTypeCode;
 import com.mycompany.myapp.repository.FuelTypeRepository;
+import com.mycompany.myapp.service.dto.FuelTypeDTO;
+import com.mycompany.myapp.service.mapper.FuelTypeMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
@@ -51,6 +53,9 @@ class FuelTypeResourceIT {
     private FuelTypeRepository fuelTypeRepository;
 
     @Autowired
+    private FuelTypeMapper fuelTypeMapper;
+
+    @Autowired
     private EntityManager em;
 
     @Autowired
@@ -90,8 +95,9 @@ class FuelTypeResourceIT {
     void createFuelType() throws Exception {
         int databaseSizeBeforeCreate = fuelTypeRepository.findAll().size();
         // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
         restFuelTypeMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isCreated());
 
         // Validate the FuelType in the database
@@ -108,12 +114,13 @@ class FuelTypeResourceIT {
     void createFuelTypeWithExistingId() throws Exception {
         // Create the FuelType with an existing ID
         fuelType.setId(1L);
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
 
         int databaseSizeBeforeCreate = fuelTypeRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restFuelTypeMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the FuelType in the database
@@ -129,9 +136,10 @@ class FuelTypeResourceIT {
         fuelType.setName(null);
 
         // Create the FuelType, which fails.
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
 
         restFuelTypeMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isBadRequest());
 
         List<FuelType> fuelTypeList = fuelTypeRepository.findAll();
@@ -146,9 +154,10 @@ class FuelTypeResourceIT {
         fuelType.setFuelTypeCode(null);
 
         // Create the FuelType, which fails.
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
 
         restFuelTypeMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isBadRequest());
 
         List<FuelType> fuelTypeList = fuelTypeRepository.findAll();
@@ -163,9 +172,10 @@ class FuelTypeResourceIT {
         fuelType.setCarbonFactory(null);
 
         // Create the FuelType, which fails.
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
 
         restFuelTypeMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isBadRequest());
 
         List<FuelType> fuelTypeList = fuelTypeRepository.findAll();
@@ -226,12 +236,13 @@ class FuelTypeResourceIT {
         // Disconnect from session so that the updates on updatedFuelType are not directly saved in db
         em.detach(updatedFuelType);
         updatedFuelType.name(UPDATED_NAME).fuelTypeCode(UPDATED_FUEL_TYPE_CODE).carbonFactory(UPDATED_CARBON_FACTORY);
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(updatedFuelType);
 
         restFuelTypeMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedFuelType.getId())
+                put(ENTITY_API_URL_ID, fuelTypeDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedFuelType))
+                    .content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
             )
             .andExpect(status().isOk());
 
@@ -250,12 +261,15 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, fuelType.getId())
+                put(ENTITY_API_URL_ID, fuelTypeDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(fuelType))
+                    .content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -270,12 +284,15 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(fuelType))
+                    .content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -290,9 +307,12 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the FuelType in the database
@@ -368,12 +388,15 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, fuelType.getId())
+                patch(ENTITY_API_URL_ID, fuelTypeDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(fuelType))
+                    .content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -388,12 +411,15 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(fuelType))
+                    .content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -408,9 +434,14 @@ class FuelTypeResourceIT {
         int databaseSizeBeforeUpdate = fuelTypeRepository.findAll().size();
         fuelType.setId(count.incrementAndGet());
 
+        // Create the FuelType
+        FuelTypeDTO fuelTypeDTO = fuelTypeMapper.toDto(fuelType);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFuelTypeMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(fuelType)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(fuelTypeDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the FuelType in the database

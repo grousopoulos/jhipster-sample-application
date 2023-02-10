@@ -1,7 +1,8 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.EventReportLine;
 import com.mycompany.myapp.repository.EventReportLineRepository;
+import com.mycompany.myapp.service.EventReportLineService;
+import com.mycompany.myapp.service.dto.EventReportLineDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -22,7 +22,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api")
-@Transactional
 public class EventReportLineResource {
 
     private final Logger log = LoggerFactory.getLogger(EventReportLineResource.class);
@@ -32,26 +31,30 @@ public class EventReportLineResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private final EventReportLineService eventReportLineService;
+
     private final EventReportLineRepository eventReportLineRepository;
 
-    public EventReportLineResource(EventReportLineRepository eventReportLineRepository) {
+    public EventReportLineResource(EventReportLineService eventReportLineService, EventReportLineRepository eventReportLineRepository) {
+        this.eventReportLineService = eventReportLineService;
         this.eventReportLineRepository = eventReportLineRepository;
     }
 
     /**
      * {@code POST  /event-report-lines} : Create a new eventReportLine.
      *
-     * @param eventReportLine the eventReportLine to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new eventReportLine, or with status {@code 400 (Bad Request)} if the eventReportLine has already an ID.
+     * @param eventReportLineDTO the eventReportLineDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new eventReportLineDTO, or with status {@code 400 (Bad Request)} if the eventReportLine has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/event-report-lines")
-    public ResponseEntity<EventReportLine> createEventReportLine(@RequestBody EventReportLine eventReportLine) throws URISyntaxException {
-        log.debug("REST request to save EventReportLine : {}", eventReportLine);
-        if (eventReportLine.getId() != null) {
+    public ResponseEntity<EventReportLineDTO> createEventReportLine(@RequestBody EventReportLineDTO eventReportLineDTO)
+        throws URISyntaxException {
+        log.debug("REST request to save EventReportLine : {}", eventReportLineDTO);
+        if (eventReportLineDTO.getId() != null) {
             throw new BadRequestAlertException("A new eventReportLine cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        EventReportLine result = eventReportLineRepository.save(eventReportLine);
+        EventReportLineDTO result = eventReportLineService.save(eventReportLineDTO);
         return ResponseEntity
             .created(new URI("/api/event-report-lines/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
@@ -61,23 +64,23 @@ public class EventReportLineResource {
     /**
      * {@code PUT  /event-report-lines/:id} : Updates an existing eventReportLine.
      *
-     * @param id the id of the eventReportLine to save.
-     * @param eventReportLine the eventReportLine to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportLine,
-     * or with status {@code 400 (Bad Request)} if the eventReportLine is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the eventReportLine couldn't be updated.
+     * @param id the id of the eventReportLineDTO to save.
+     * @param eventReportLineDTO the eventReportLineDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportLineDTO,
+     * or with status {@code 400 (Bad Request)} if the eventReportLineDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the eventReportLineDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/event-report-lines/{id}")
-    public ResponseEntity<EventReportLine> updateEventReportLine(
+    public ResponseEntity<EventReportLineDTO> updateEventReportLine(
         @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody EventReportLine eventReportLine
+        @RequestBody EventReportLineDTO eventReportLineDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update EventReportLine : {}, {}", id, eventReportLine);
-        if (eventReportLine.getId() == null) {
+        log.debug("REST request to update EventReportLine : {}, {}", id, eventReportLineDTO);
+        if (eventReportLineDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, eventReportLine.getId())) {
+        if (!Objects.equals(id, eventReportLineDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -85,34 +88,34 @@ public class EventReportLineResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        EventReportLine result = eventReportLineRepository.save(eventReportLine);
+        EventReportLineDTO result = eventReportLineService.update(eventReportLineDTO);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportLine.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportLineDTO.getId().toString()))
             .body(result);
     }
 
     /**
      * {@code PATCH  /event-report-lines/:id} : Partial updates given fields of an existing eventReportLine, field will ignore if it is null
      *
-     * @param id the id of the eventReportLine to save.
-     * @param eventReportLine the eventReportLine to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportLine,
-     * or with status {@code 400 (Bad Request)} if the eventReportLine is not valid,
-     * or with status {@code 404 (Not Found)} if the eventReportLine is not found,
-     * or with status {@code 500 (Internal Server Error)} if the eventReportLine couldn't be updated.
+     * @param id the id of the eventReportLineDTO to save.
+     * @param eventReportLineDTO the eventReportLineDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated eventReportLineDTO,
+     * or with status {@code 400 (Bad Request)} if the eventReportLineDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the eventReportLineDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the eventReportLineDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/event-report-lines/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<EventReportLine> partialUpdateEventReportLine(
+    public ResponseEntity<EventReportLineDTO> partialUpdateEventReportLine(
         @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody EventReportLine eventReportLine
+        @RequestBody EventReportLineDTO eventReportLineDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update EventReportLine partially : {}, {}", id, eventReportLine);
-        if (eventReportLine.getId() == null) {
+        log.debug("REST request to partial update EventReportLine partially : {}, {}", id, eventReportLineDTO);
+        if (eventReportLineDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, eventReportLine.getId())) {
+        if (!Objects.equals(id, eventReportLineDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -120,23 +123,11 @@ public class EventReportLineResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<EventReportLine> result = eventReportLineRepository
-            .findById(eventReportLine.getId())
-            .map(existingEventReportLine -> {
-                if (eventReportLine.getQuantity() != null) {
-                    existingEventReportLine.setQuantity(eventReportLine.getQuantity());
-                }
-                if (eventReportLine.getUnitOfMeasure() != null) {
-                    existingEventReportLine.setUnitOfMeasure(eventReportLine.getUnitOfMeasure());
-                }
-
-                return existingEventReportLine;
-            })
-            .map(eventReportLineRepository::save);
+        Optional<EventReportLineDTO> result = eventReportLineService.partialUpdate(eventReportLineDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportLine.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventReportLineDTO.getId().toString())
         );
     }
 
@@ -146,34 +137,34 @@ public class EventReportLineResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of eventReportLines in body.
      */
     @GetMapping("/event-report-lines")
-    public List<EventReportLine> getAllEventReportLines() {
+    public List<EventReportLineDTO> getAllEventReportLines() {
         log.debug("REST request to get all EventReportLines");
-        return eventReportLineRepository.findAll();
+        return eventReportLineService.findAll();
     }
 
     /**
      * {@code GET  /event-report-lines/:id} : get the "id" eventReportLine.
      *
-     * @param id the id of the eventReportLine to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eventReportLine, or with status {@code 404 (Not Found)}.
+     * @param id the id of the eventReportLineDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eventReportLineDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/event-report-lines/{id}")
-    public ResponseEntity<EventReportLine> getEventReportLine(@PathVariable Long id) {
+    public ResponseEntity<EventReportLineDTO> getEventReportLine(@PathVariable Long id) {
         log.debug("REST request to get EventReportLine : {}", id);
-        Optional<EventReportLine> eventReportLine = eventReportLineRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(eventReportLine);
+        Optional<EventReportLineDTO> eventReportLineDTO = eventReportLineService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(eventReportLineDTO);
     }
 
     /**
      * {@code DELETE  /event-report-lines/:id} : delete the "id" eventReportLine.
      *
-     * @param id the id of the eventReportLine to delete.
+     * @param id the id of the eventReportLineDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/event-report-lines/{id}")
     public ResponseEntity<Void> deleteEventReportLine(@PathVariable Long id) {
         log.debug("REST request to delete EventReportLine : {}", id);
-        eventReportLineRepository.deleteById(id);
+        eventReportLineService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))

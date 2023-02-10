@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Flag;
 import com.mycompany.myapp.repository.FlagRepository;
+import com.mycompany.myapp.service.dto.FlagDTO;
+import com.mycompany.myapp.service.mapper.FlagMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class FlagResourceIT {
 
     @Autowired
     private FlagRepository flagRepository;
+
+    @Autowired
+    private FlagMapper flagMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,9 @@ class FlagResourceIT {
     void createFlag() throws Exception {
         int databaseSizeBeforeCreate = flagRepository.findAll().size();
         // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
         restFlagMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Flag in the database
@@ -101,12 +107,13 @@ class FlagResourceIT {
     void createFlagWithExistingId() throws Exception {
         // Create the Flag with an existing ID
         flag.setId(1L);
+        FlagDTO flagDTO = flagMapper.toDto(flag);
 
         int databaseSizeBeforeCreate = flagRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restFlagMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Flag in the database
@@ -122,9 +129,10 @@ class FlagResourceIT {
         flag.setCode(null);
 
         // Create the Flag, which fails.
+        FlagDTO flagDTO = flagMapper.toDto(flag);
 
         restFlagMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isBadRequest());
 
         List<Flag> flagList = flagRepository.findAll();
@@ -139,9 +147,10 @@ class FlagResourceIT {
         flag.setName(null);
 
         // Create the Flag, which fails.
+        FlagDTO flagDTO = flagMapper.toDto(flag);
 
         restFlagMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isBadRequest());
 
         List<Flag> flagList = flagRepository.findAll();
@@ -200,12 +209,13 @@ class FlagResourceIT {
         // Disconnect from session so that the updates on updatedFlag are not directly saved in db
         em.detach(updatedFlag);
         updatedFlag.code(UPDATED_CODE).name(UPDATED_NAME);
+        FlagDTO flagDTO = flagMapper.toDto(updatedFlag);
 
         restFlagMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedFlag.getId())
+                put(ENTITY_API_URL_ID, flagDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedFlag))
+                    .content(TestUtil.convertObjectToJsonBytes(flagDTO))
             )
             .andExpect(status().isOk());
 
@@ -223,12 +233,15 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restFlagMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, flag.getId())
+                put(ENTITY_API_URL_ID, flagDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(flag))
+                    .content(TestUtil.convertObjectToJsonBytes(flagDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -243,12 +256,15 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFlagMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(flag))
+                    .content(TestUtil.convertObjectToJsonBytes(flagDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -263,9 +279,12 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFlagMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Flag in the database
@@ -339,12 +358,15 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restFlagMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, flag.getId())
+                patch(ENTITY_API_URL_ID, flagDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(flag))
+                    .content(TestUtil.convertObjectToJsonBytes(flagDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -359,12 +381,15 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFlagMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(flag))
+                    .content(TestUtil.convertObjectToJsonBytes(flagDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -379,9 +404,12 @@ class FlagResourceIT {
         int databaseSizeBeforeUpdate = flagRepository.findAll().size();
         flag.setId(count.incrementAndGet());
 
+        // Create the Flag
+        FlagDTO flagDTO = flagMapper.toDto(flag);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restFlagMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(flag)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(flagDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Flag in the database

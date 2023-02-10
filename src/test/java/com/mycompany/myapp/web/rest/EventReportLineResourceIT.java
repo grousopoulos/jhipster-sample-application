@@ -10,6 +10,8 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.EventReportLine;
 import com.mycompany.myapp.domain.enumeration.UnitOfMeasure;
 import com.mycompany.myapp.repository.EventReportLineRepository;
+import com.mycompany.myapp.service.dto.EventReportLineDTO;
+import com.mycompany.myapp.service.mapper.EventReportLineMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
@@ -46,6 +48,9 @@ class EventReportLineResourceIT {
 
     @Autowired
     private EventReportLineRepository eventReportLineRepository;
+
+    @Autowired
+    private EventReportLineMapper eventReportLineMapper;
 
     @Autowired
     private EntityManager em;
@@ -87,9 +92,10 @@ class EventReportLineResourceIT {
     void createEventReportLine() throws Exception {
         int databaseSizeBeforeCreate = eventReportLineRepository.findAll().size();
         // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
         restEventReportLineMockMvc
             .perform(
-                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isCreated());
 
@@ -106,13 +112,14 @@ class EventReportLineResourceIT {
     void createEventReportLineWithExistingId() throws Exception {
         // Create the EventReportLine with an existing ID
         eventReportLine.setId(1L);
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
 
         int databaseSizeBeforeCreate = eventReportLineRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restEventReportLineMockMvc
             .perform(
-                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -173,12 +180,13 @@ class EventReportLineResourceIT {
         // Disconnect from session so that the updates on updatedEventReportLine are not directly saved in db
         em.detach(updatedEventReportLine);
         updatedEventReportLine.quantity(UPDATED_QUANTITY).unitOfMeasure(UPDATED_UNIT_OF_MEASURE);
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(updatedEventReportLine);
 
         restEventReportLineMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedEventReportLine.getId())
+                put(ENTITY_API_URL_ID, eventReportLineDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedEventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isOk());
 
@@ -196,12 +204,15 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, eventReportLine.getId())
+                put(ENTITY_API_URL_ID, eventReportLineDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -216,12 +227,15 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -236,10 +250,13 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
-                put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 
@@ -312,12 +329,15 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, eventReportLine.getId())
+                patch(ENTITY_API_URL_ID, eventReportLineDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -332,12 +352,15 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -352,12 +375,15 @@ class EventReportLineResourceIT {
         int databaseSizeBeforeUpdate = eventReportLineRepository.findAll().size();
         eventReportLine.setId(count.incrementAndGet());
 
+        // Create the EventReportLine
+        EventReportLineDTO eventReportLineDTO = eventReportLineMapper.toDto(eventReportLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restEventReportLineMockMvc
             .perform(
                 patch(ENTITY_API_URL)
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(eventReportLine))
+                    .content(TestUtil.convertObjectToJsonBytes(eventReportLineDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 

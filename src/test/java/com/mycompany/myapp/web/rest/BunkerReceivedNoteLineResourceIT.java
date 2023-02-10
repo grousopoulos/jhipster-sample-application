@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.BunkerReceivedNoteLine;
 import com.mycompany.myapp.repository.BunkerReceivedNoteLineRepository;
+import com.mycompany.myapp.service.dto.BunkerReceivedNoteLineDTO;
+import com.mycompany.myapp.service.mapper.BunkerReceivedNoteLineMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
@@ -42,6 +44,9 @@ class BunkerReceivedNoteLineResourceIT {
 
     @Autowired
     private BunkerReceivedNoteLineRepository bunkerReceivedNoteLineRepository;
+
+    @Autowired
+    private BunkerReceivedNoteLineMapper bunkerReceivedNoteLineMapper;
 
     @Autowired
     private EntityManager em;
@@ -83,11 +88,12 @@ class BunkerReceivedNoteLineResourceIT {
     void createBunkerReceivedNoteLine() throws Exception {
         int databaseSizeBeforeCreate = bunkerReceivedNoteLineRepository.findAll().size();
         // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
         restBunkerReceivedNoteLineMockMvc
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isCreated());
 
@@ -103,6 +109,7 @@ class BunkerReceivedNoteLineResourceIT {
     void createBunkerReceivedNoteLineWithExistingId() throws Exception {
         // Create the BunkerReceivedNoteLine with an existing ID
         bunkerReceivedNoteLine.setId(1L);
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
 
         int databaseSizeBeforeCreate = bunkerReceivedNoteLineRepository.findAll().size();
 
@@ -111,7 +118,7 @@ class BunkerReceivedNoteLineResourceIT {
             .perform(
                 post(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -172,12 +179,13 @@ class BunkerReceivedNoteLineResourceIT {
         // Disconnect from session so that the updates on updatedBunkerReceivedNoteLine are not directly saved in db
         em.detach(updatedBunkerReceivedNoteLine);
         updatedBunkerReceivedNoteLine.quantity(UPDATED_QUANTITY);
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(updatedBunkerReceivedNoteLine);
 
         restBunkerReceivedNoteLineMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedBunkerReceivedNoteLine.getId())
+                put(ENTITY_API_URL_ID, bunkerReceivedNoteLineDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedBunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isOk());
 
@@ -194,12 +202,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, bunkerReceivedNoteLine.getId())
+                put(ENTITY_API_URL_ID, bunkerReceivedNoteLineDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -214,12 +225,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -234,12 +248,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
                 put(ENTITY_API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 
@@ -310,12 +327,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, bunkerReceivedNoteLine.getId())
+                patch(ENTITY_API_URL_ID, bunkerReceivedNoteLineDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -330,12 +350,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -350,12 +373,15 @@ class BunkerReceivedNoteLineResourceIT {
         int databaseSizeBeforeUpdate = bunkerReceivedNoteLineRepository.findAll().size();
         bunkerReceivedNoteLine.setId(count.incrementAndGet());
 
+        // Create the BunkerReceivedNoteLine
+        BunkerReceivedNoteLineDTO bunkerReceivedNoteLineDTO = bunkerReceivedNoteLineMapper.toDto(bunkerReceivedNoteLine);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBunkerReceivedNoteLineMockMvc
             .perform(
                 patch(ENTITY_API_URL)
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLine))
+                    .content(TestUtil.convertObjectToJsonBytes(bunkerReceivedNoteLineDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 

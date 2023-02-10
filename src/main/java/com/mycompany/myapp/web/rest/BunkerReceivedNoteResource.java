@@ -1,7 +1,8 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.BunkerReceivedNote;
 import com.mycompany.myapp.repository.BunkerReceivedNoteRepository;
+import com.mycompany.myapp.service.BunkerReceivedNoteService;
+import com.mycompany.myapp.service.dto.BunkerReceivedNoteDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -24,7 +24,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api")
-@Transactional
 public class BunkerReceivedNoteResource {
 
     private final Logger log = LoggerFactory.getLogger(BunkerReceivedNoteResource.class);
@@ -34,27 +33,33 @@ public class BunkerReceivedNoteResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private final BunkerReceivedNoteService bunkerReceivedNoteService;
+
     private final BunkerReceivedNoteRepository bunkerReceivedNoteRepository;
 
-    public BunkerReceivedNoteResource(BunkerReceivedNoteRepository bunkerReceivedNoteRepository) {
+    public BunkerReceivedNoteResource(
+        BunkerReceivedNoteService bunkerReceivedNoteService,
+        BunkerReceivedNoteRepository bunkerReceivedNoteRepository
+    ) {
+        this.bunkerReceivedNoteService = bunkerReceivedNoteService;
         this.bunkerReceivedNoteRepository = bunkerReceivedNoteRepository;
     }
 
     /**
      * {@code POST  /bunker-received-notes} : Create a new bunkerReceivedNote.
      *
-     * @param bunkerReceivedNote the bunkerReceivedNote to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new bunkerReceivedNote, or with status {@code 400 (Bad Request)} if the bunkerReceivedNote has already an ID.
+     * @param bunkerReceivedNoteDTO the bunkerReceivedNoteDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new bunkerReceivedNoteDTO, or with status {@code 400 (Bad Request)} if the bunkerReceivedNote has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/bunker-received-notes")
-    public ResponseEntity<BunkerReceivedNote> createBunkerReceivedNote(@Valid @RequestBody BunkerReceivedNote bunkerReceivedNote)
+    public ResponseEntity<BunkerReceivedNoteDTO> createBunkerReceivedNote(@Valid @RequestBody BunkerReceivedNoteDTO bunkerReceivedNoteDTO)
         throws URISyntaxException {
-        log.debug("REST request to save BunkerReceivedNote : {}", bunkerReceivedNote);
-        if (bunkerReceivedNote.getId() != null) {
+        log.debug("REST request to save BunkerReceivedNote : {}", bunkerReceivedNoteDTO);
+        if (bunkerReceivedNoteDTO.getId() != null) {
             throw new BadRequestAlertException("A new bunkerReceivedNote cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        BunkerReceivedNote result = bunkerReceivedNoteRepository.save(bunkerReceivedNote);
+        BunkerReceivedNoteDTO result = bunkerReceivedNoteService.save(bunkerReceivedNoteDTO);
         return ResponseEntity
             .created(new URI("/api/bunker-received-notes/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
@@ -64,23 +69,23 @@ public class BunkerReceivedNoteResource {
     /**
      * {@code PUT  /bunker-received-notes/:id} : Updates an existing bunkerReceivedNote.
      *
-     * @param id the id of the bunkerReceivedNote to save.
-     * @param bunkerReceivedNote the bunkerReceivedNote to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated bunkerReceivedNote,
-     * or with status {@code 400 (Bad Request)} if the bunkerReceivedNote is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the bunkerReceivedNote couldn't be updated.
+     * @param id the id of the bunkerReceivedNoteDTO to save.
+     * @param bunkerReceivedNoteDTO the bunkerReceivedNoteDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated bunkerReceivedNoteDTO,
+     * or with status {@code 400 (Bad Request)} if the bunkerReceivedNoteDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the bunkerReceivedNoteDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/bunker-received-notes/{id}")
-    public ResponseEntity<BunkerReceivedNote> updateBunkerReceivedNote(
+    public ResponseEntity<BunkerReceivedNoteDTO> updateBunkerReceivedNote(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody BunkerReceivedNote bunkerReceivedNote
+        @Valid @RequestBody BunkerReceivedNoteDTO bunkerReceivedNoteDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update BunkerReceivedNote : {}, {}", id, bunkerReceivedNote);
-        if (bunkerReceivedNote.getId() == null) {
+        log.debug("REST request to update BunkerReceivedNote : {}, {}", id, bunkerReceivedNoteDTO);
+        if (bunkerReceivedNoteDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, bunkerReceivedNote.getId())) {
+        if (!Objects.equals(id, bunkerReceivedNoteDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -88,34 +93,34 @@ public class BunkerReceivedNoteResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        BunkerReceivedNote result = bunkerReceivedNoteRepository.save(bunkerReceivedNote);
+        BunkerReceivedNoteDTO result = bunkerReceivedNoteService.update(bunkerReceivedNoteDTO);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, bunkerReceivedNote.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, bunkerReceivedNoteDTO.getId().toString()))
             .body(result);
     }
 
     /**
      * {@code PATCH  /bunker-received-notes/:id} : Partial updates given fields of an existing bunkerReceivedNote, field will ignore if it is null
      *
-     * @param id the id of the bunkerReceivedNote to save.
-     * @param bunkerReceivedNote the bunkerReceivedNote to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated bunkerReceivedNote,
-     * or with status {@code 400 (Bad Request)} if the bunkerReceivedNote is not valid,
-     * or with status {@code 404 (Not Found)} if the bunkerReceivedNote is not found,
-     * or with status {@code 500 (Internal Server Error)} if the bunkerReceivedNote couldn't be updated.
+     * @param id the id of the bunkerReceivedNoteDTO to save.
+     * @param bunkerReceivedNoteDTO the bunkerReceivedNoteDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated bunkerReceivedNoteDTO,
+     * or with status {@code 400 (Bad Request)} if the bunkerReceivedNoteDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the bunkerReceivedNoteDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the bunkerReceivedNoteDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/bunker-received-notes/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<BunkerReceivedNote> partialUpdateBunkerReceivedNote(
+    public ResponseEntity<BunkerReceivedNoteDTO> partialUpdateBunkerReceivedNote(
         @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody BunkerReceivedNote bunkerReceivedNote
+        @NotNull @RequestBody BunkerReceivedNoteDTO bunkerReceivedNoteDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update BunkerReceivedNote partially : {}, {}", id, bunkerReceivedNote);
-        if (bunkerReceivedNote.getId() == null) {
+        log.debug("REST request to partial update BunkerReceivedNote partially : {}, {}", id, bunkerReceivedNoteDTO);
+        if (bunkerReceivedNoteDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, bunkerReceivedNote.getId())) {
+        if (!Objects.equals(id, bunkerReceivedNoteDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -123,23 +128,11 @@ public class BunkerReceivedNoteResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<BunkerReceivedNote> result = bunkerReceivedNoteRepository
-            .findById(bunkerReceivedNote.getId())
-            .map(existingBunkerReceivedNote -> {
-                if (bunkerReceivedNote.getDocumentDateAndTime() != null) {
-                    existingBunkerReceivedNote.setDocumentDateAndTime(bunkerReceivedNote.getDocumentDateAndTime());
-                }
-                if (bunkerReceivedNote.getDocumentDisplayNumber() != null) {
-                    existingBunkerReceivedNote.setDocumentDisplayNumber(bunkerReceivedNote.getDocumentDisplayNumber());
-                }
-
-                return existingBunkerReceivedNote;
-            })
-            .map(bunkerReceivedNoteRepository::save);
+        Optional<BunkerReceivedNoteDTO> result = bunkerReceivedNoteService.partialUpdate(bunkerReceivedNoteDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, bunkerReceivedNote.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, bunkerReceivedNoteDTO.getId().toString())
         );
     }
 
@@ -149,34 +142,34 @@ public class BunkerReceivedNoteResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of bunkerReceivedNotes in body.
      */
     @GetMapping("/bunker-received-notes")
-    public List<BunkerReceivedNote> getAllBunkerReceivedNotes() {
+    public List<BunkerReceivedNoteDTO> getAllBunkerReceivedNotes() {
         log.debug("REST request to get all BunkerReceivedNotes");
-        return bunkerReceivedNoteRepository.findAll();
+        return bunkerReceivedNoteService.findAll();
     }
 
     /**
      * {@code GET  /bunker-received-notes/:id} : get the "id" bunkerReceivedNote.
      *
-     * @param id the id of the bunkerReceivedNote to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the bunkerReceivedNote, or with status {@code 404 (Not Found)}.
+     * @param id the id of the bunkerReceivedNoteDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the bunkerReceivedNoteDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/bunker-received-notes/{id}")
-    public ResponseEntity<BunkerReceivedNote> getBunkerReceivedNote(@PathVariable Long id) {
+    public ResponseEntity<BunkerReceivedNoteDTO> getBunkerReceivedNote(@PathVariable Long id) {
         log.debug("REST request to get BunkerReceivedNote : {}", id);
-        Optional<BunkerReceivedNote> bunkerReceivedNote = bunkerReceivedNoteRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(bunkerReceivedNote);
+        Optional<BunkerReceivedNoteDTO> bunkerReceivedNoteDTO = bunkerReceivedNoteService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(bunkerReceivedNoteDTO);
     }
 
     /**
      * {@code DELETE  /bunker-received-notes/:id} : delete the "id" bunkerReceivedNote.
      *
-     * @param id the id of the bunkerReceivedNote to delete.
+     * @param id the id of the bunkerReceivedNoteDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/bunker-received-notes/{id}")
     public ResponseEntity<Void> deleteBunkerReceivedNote(@PathVariable Long id) {
         log.debug("REST request to delete BunkerReceivedNote : {}", id);
-        bunkerReceivedNoteRepository.deleteById(id);
+        bunkerReceivedNoteService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
